@@ -8,6 +8,6 @@ A downstream progressive bezier modifier that modifies waypoint based paths from
 5. all the scenarios are run through teensy, if there are impossible scenarios, the code might crash and not output will be provided by the teensy, thus check 'input_visualization' folder after running input.py as it'll generate html files of 3d plots for each scenarios for you to view and debug scenario inputs [make sure to have required python dependencies such as matplotlib and plotly, both are used here]
 6. successful run on the teensy would create json file results by the run.py in teensy_results/ directory. u can safely unplug the teensy
 7. running output.py after those json files are created, will also create html files for each scenario in output_visualization/ directory to view outputs in 3d plots
-8. results from my own experiments and research is saved in 'test_results (ablation)/' directory
+8. This is only in experimental stage so again, not recommended for global usage unless one knows what he's doing
 9. don't forget to crashout if u didn't understand anything
 10. have fun!
