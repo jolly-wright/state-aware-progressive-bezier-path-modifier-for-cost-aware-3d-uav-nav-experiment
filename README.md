@@ -1,0 +1,2 @@
+# state-aware-progressive-bezier-path-modifier-for-cost-aware-3d-uav-nav
+A downstream progressive bezier modifier that modifies waypoint based paths from upstream planners with proper data output format, modifies by going through collision and objective wighted cost fuctions. This is still an experimental stage, experimented on Teensy 4.0, not recommended for direct usage unless one knows what they are doing.
