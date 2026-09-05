@@ -1,0 +1,185 @@
+{
+    "scenario_id": 1,
+    "success": true,
+    "timing": {
+        "generation_time_ms": 5693.122,
+        "sum_segment_generation_time_ms": 5693.12
+    },
+    "search_statistics": {
+        "generated_segments": 3,
+        "incorporated_corners": 3,
+        "stage1_candidate_evaluations": 2364,
+        "stage3_candidate_evaluations": 3,
+        "refinement_iterations": 1
+    },
+    "uav": {
+        "position": [
+            0,
+            0,
+            0
+        ],
+        "velocity": [
+            1,
+            0,
+            0
+        ],
+        "dimensions": [
+            0.3,
+            0.3,
+            0.15
+        ],
+        "max_velocity_mps": 10,
+        "max_lateral_acceleration_mps2": 8
+    },
+    "goal": {
+        "position": [
+            10,
+            5,
+            4
+        ]
+    },
+    "goal_reached": true,
+    "map": {
+        "resolution_m": 0.1,
+        "obstacles": [
+            {
+                "id": 0,
+                "min": [
+                    4,
+                    -2,
+                    -4
+                ],
+                "max": [
+                    6,
+                    2,
+                    4
+                ]
+            },
+            {
+                "id": 1,
+                "min": [
+                    9,
+                    -4,
+                    0
+                ],
+                "max": [
+                    11,
+                    0,
+                    6
+                ]
+            },
+            {
+                "id": 2,
+                "min": [
+                    0,
+                    2,
+                    -5
+                ],
+                "max": [
+                    4,
+                    6,
+                    5
+                ]
+            }
+        ]
+    },
+    "upstream_path": [
+        [
+            0,
+            0,
+            0
+        ],
+        [
+            5,
+            -4,
+            0
+        ],
+        [
+            8,
+            -0.75,
+            2
+        ],
+        [
+            10,
+            5,
+            4
+        ]
+    ],
+    "final_bezier_segments": [
+        {
+            "corner_index": 1,
+            "generation_time_ms": 1251.606,
+            "maximum_curvature": 0.41909217,
+            "P0": [
+                0,
+                0,
+                0
+            ],
+            "P1": [
+                0.570156212,
+                0,
+                0
+            ],
+            "P2": [
+                2.810856729,
+                -0.204356533,
+                -1.653273245e-16
+            ],
+            "P3": [
+                5,
+                -4,
+                0
+            ]
+        },
+        {
+            "corner_index": 2,
+            "generation_time_ms": 3045.295,
+            "maximum_curvature": 1.137044766,
+            "P0": [
+                5,
+                -4,
+                0
+            ],
+            "P1": [
+                8.199071126,
+                -9.546705683,
+                2.415985637e-16
+            ],
+            "P2": [
+                9.379970858,
+                -2.059849768,
+                1.702195386
+            ],
+            "P3": [
+                8,
+                -0.75,
+                2
+            ]
+        },
+        {
+            "corner_index": 3,
+            "generation_time_ms": 1396.219,
+            "maximum_curvature": 0.548763169,
+            "P0": [
+                8,
+                -0.75,
+                2
+            ],
+            "P1": [
+                6,
+                1.148373087,
+                2.431610004
+            ],
+            "P2": [
+                9.121908351,
+                3.613469562,
+                3.315911386
+            ],
+            "P3": [
+                10,
+                5,
+                4
+            ]
+        }
+    ]
+}
