@@ -438,6 +438,9 @@ std::vector<Ray> makeCoarseRays(
 //
 // The final anchor is exactly P3.
 //
+// The actual P1 supplied here has already passed through the P1 construction
+// and obstacle-limiting logic in makeSearchP1().
+//
 
 std::vector<Anchor> makeAnchors(
     const Vec3& P1,
@@ -759,6 +762,251 @@ double exactUpstreamLength(
 
 
 // ============================================================================
+// DYNAMIC SEARCH RADIUS
+// ============================================================================
+//
+// The search geometry is defined by:
+//
+//     P1 ---------------- P3
+//
+// NOT:
+//
+//     P0 ---------------- P3
+//
+// P1 is the actual P1 produced by makeSearchP1(), meaning that on
+// continuation segments it has already been limited against the nearest
+// obstacle.
+//
+// The P1 -> P3 direction is treated as the "ground" direction.
+//
+// The UAV starts with its current speed magnitude:
+//
+//     v = |state.velocity|
+//
+// The direction is:
+//
+//     first segment:
+//         state.velocity
+//
+//     subsequent segments:
+//         terminal tangent of previousSegment
+//
+// A_MAX is treated as a constant acceleration acting toward the
+// P1 -> P3 line.
+//
+// The perpendicular motion therefore follows:
+//
+//     d(t) = v_perpendicular * t
+//            - 0.5 * A_MAX * t^2
+//
+// The projectile reaches the P1 -> P3 line again at:
+//
+//     t_return = 2 * |v_perpendicular| / A_MAX
+//
+// Its maximum perpendicular displacement is:
+//
+//     d_max = v_perpendicular^2 / (2 * A_MAX)
+//
+// The along-line distance travelled by that time is checked against
+// the P1 -> P3 segment.
+//
+// If the projectile reaches the line before passing P3,
+// d_max becomes the radial search limit.
+//
+// Otherwise the normal L13 * 0.5 fallback radius is retained.
+//
+
+double makeDynamicSearchRadius(
+    const Vec3& P1,
+    const Vec3& P3,
+    const UAVState& state,
+    const config::VehicleConfig& vehicle,
+    bool hasPreviousSegment,
+    const BezierSegment& previousSegment)
+{
+    const Vec3 P3MinusP1 =
+        P3 - P1;
+
+    const double L13 =
+        P3MinusP1.norm();
+
+    if (L13 <=
+        config::EPS_GEOMETRY)
+    {
+        return 0.0;
+    }
+
+    // ------------------------------------------------------------------------
+    // Normal fallback radius.
+    // ------------------------------------------------------------------------
+
+    const double fallbackRadius =
+        L13 * 0.5;
+
+    // ------------------------------------------------------------------------
+    // The simulation uses the magnitude of the current state velocity for
+    // every segment.
+    // ------------------------------------------------------------------------
+
+    const double speed =
+        state.velocity.norm();
+
+    if (speed <=
+        config::EPS_GEOMETRY)
+    {
+        return fallbackRadius;
+    }
+
+    // ------------------------------------------------------------------------
+    // Determine the initial direction for this segment.
+    // ------------------------------------------------------------------------
+
+    Vec3 initialVelocity =
+        state.velocity;
+
+    if (hasPreviousSegment)
+    {
+        initialVelocity =
+            previousSegment.firstDerivative(
+                1.0
+            );
+    }
+
+    const double initialDirectionLength =
+        initialVelocity.norm();
+
+    if (initialDirectionLength <=
+        config::EPS_GEOMETRY)
+    {
+        return fallbackRadius;
+    }
+
+    const Vec3 initialDirection =
+        initialVelocity /
+        initialDirectionLength;
+
+    // ------------------------------------------------------------------------
+    // Direction from P1 toward P3.
+    // ------------------------------------------------------------------------
+
+    const Vec3 e13 =
+        P3MinusP1 / L13;
+
+    // ------------------------------------------------------------------------
+    // Resolve the initial velocity into components parallel and perpendicular
+    // to the P1 -> P3 line.
+    // ------------------------------------------------------------------------
+
+    const double vParallel =
+        speed *
+        dot(
+            initialDirection,
+            e13
+        );
+
+    const double vPerpendicularSquared =
+        std::max(
+            0.0,
+            speed * speed -
+            vParallel * vParallel
+        );
+
+    const double vPerpendicular =
+        std::sqrt(
+            vPerpendicularSquared
+        );
+
+    // ------------------------------------------------------------------------
+    // No meaningful lateral component -> normal fallback.
+    // ------------------------------------------------------------------------
+
+    if (vPerpendicular <=
+        config::EPS_GEOMETRY)
+    {
+        return fallbackRadius;
+    }
+
+    // ------------------------------------------------------------------------
+    // If the UAV is not travelling toward P3 along the P1 -> P3 direction,
+    // the projectile cannot return to the intended segment in the required
+    // forward direction.
+    // ------------------------------------------------------------------------
+
+    if (vParallel <=
+        config::EPS_GEOMETRY)
+    {
+        return fallbackRadius;
+    }
+
+    // ------------------------------------------------------------------------
+    // Maximum lateral acceleration.
+    // ------------------------------------------------------------------------
+
+    const double A_MAX =
+        vehicle.A_MAX;
+
+    if (A_MAX <=
+        config::EPS_GEOMETRY)
+    {
+        return fallbackRadius;
+    }
+
+    // ------------------------------------------------------------------------
+    // Time at which perpendicular motion returns to the P1 -> P3 line.
+    // ------------------------------------------------------------------------
+
+    const double tReturn =
+        2.0 *
+        vPerpendicular /
+        A_MAX;
+
+    if (!std::isfinite(tReturn) ||
+        tReturn <=
+            config::EPS_GEOMETRY)
+    {
+        return fallbackRadius;
+    }
+
+    // ------------------------------------------------------------------------
+    // Along-line distance travelled before returning to the line.
+    // ------------------------------------------------------------------------
+
+    const double returnDistance =
+        vParallel *
+        tReturn;
+
+    // ------------------------------------------------------------------------
+    // If the projectile returns beyond P3, discard it.
+    // ------------------------------------------------------------------------
+
+    if (!std::isfinite(returnDistance) ||
+        returnDistance >
+            L13 +
+            config::EPS_GEOMETRY)
+    {
+        return fallbackRadius;
+    }
+
+    // ------------------------------------------------------------------------
+    // Maximum perpendicular displacement.
+    // ------------------------------------------------------------------------
+
+    const double dynamicRadius =
+        vPerpendicularSquared /
+        (2.0 * A_MAX);
+
+    if (!std::isfinite(dynamicRadius) ||
+        dynamicRadius <=
+            config::EPS_GEOMETRY)
+    {
+        return fallbackRadius;
+    }
+
+    return dynamicRadius;
+}
+
+
+// ============================================================================
 // CANDIDATE EVALUATION
 // ============================================================================
 
@@ -859,6 +1107,7 @@ bool stage1SearchWithCorner(
     const config::VehicleConfig& vehicle,
     const UAVState& state,
     double L_up,
+    double Rsearch,
     Candidate& best,
     Candidate& secondBest,
     SearchStatistics& statistics,
@@ -888,9 +1137,6 @@ bool stage1SearchWithCorner(
     const Vec3 e13 =
         P3MinusP1 / L13;
 
-    const double Rsearch =
-        L13 * 0.5;
-
     const NormalBasis basis =
         makeNormalBasis(
             e13
@@ -913,6 +1159,78 @@ bool stage1SearchWithCorner(
         {
             break;
         }
+
+        // =====================================================================
+        // ANCHOR ITSELF IS A CANDIDATE
+        // =====================================================================
+        //
+        // This is the radius = 0 candidate:
+        //
+        //     P2 = anchor.position
+        //
+        // It is evaluated before the radial candidates around the anchor.
+        //
+
+        Candidate anchorCandidate =
+            evaluateCandidate(
+                P0,
+                P1,
+                anchor.position,
+                P3,
+                cornerIndex,
+                map,
+                vehicle,
+                state,
+                L_up
+            );
+
+        anchorCandidate.anchorIndex =
+            anchor.index;
+
+        anchorCandidate.rayIndex =
+            0;
+
+        anchorCandidate.radialIndex =
+            0;
+
+        ++statistics.stage1CandidateEvaluations;
+
+        if (anchorCandidate.feasible())
+        {
+            if (!foundBest ||
+                anchorCandidate.J <
+                best.J)
+            {
+                if (foundBest)
+                {
+                    secondBest =
+                        best;
+
+                    foundSecond =
+                        true;
+                }
+
+                best =
+                    anchorCandidate;
+
+                foundBest =
+                    true;
+            }
+            else if (!foundSecond ||
+                     anchorCandidate.J <
+                     secondBest.J)
+            {
+                secondBest =
+                    anchorCandidate;
+
+                foundSecond =
+                    true;
+            }
+        }
+
+        // =====================================================================
+        // RADIAL SEARCH AROUND THE ANCHOR
+        // =====================================================================
 
         const std::vector<Ray> rays =
             makeCoarseRays(
@@ -1035,6 +1353,7 @@ Candidate stage3Refine(
     const config::VehicleConfig& vehicle,
     const UAVState& state,
     double L_up,
+    double Rsearch,
     Candidate best,
     Candidate secondBest,
     SearchStatistics& statistics,
@@ -1048,6 +1367,19 @@ Candidate stage3Refine(
 
     if (best.anchorIndex !=
         secondBest.anchorIndex)
+    {
+        return best;
+    }
+
+    // ------------------------------------------------------------------------
+    // An anchor candidate has radialIndex == 0 and therefore has no radial
+    // direction suitable for angular refinement.
+    //
+    // Stage 3 only operates between actual radial candidates.
+    // ------------------------------------------------------------------------
+
+    if (best.radialIndex == 0 ||
+        secondBest.radialIndex == 0)
     {
         return best;
     }
@@ -1066,9 +1398,6 @@ Candidate stage3Refine(
 
     const Vec3 e13 =
         P3MinusP1 / L13;
-
-    const double Rsearch =
-        L13 * 0.5;
 
     const NormalBasis basis =
         makeNormalBasis(
@@ -1485,6 +1814,8 @@ ModifierResult progressiveModify(
 
         // ---------------------------------------------------------------------
         // Construct P1.
+        //
+        // For continuation segments this includes the obstacle limitation.
         // ---------------------------------------------------------------------
 
         const Vec3 P1 =
@@ -1523,6 +1854,27 @@ ModifierResult progressiveModify(
             break;
         }
 
+        // ---------------------------------------------------------------------
+        // Dynamic radial search limit.
+        //
+        // IMPORTANT:
+        //
+        // The radius is now calculated from P1 -> P3, using the actual
+        // obstacle-limited P1.
+        //
+        // It is shared by Stage 1 and Stage 3.
+        // ---------------------------------------------------------------------
+
+        const double Rsearch =
+            makeDynamicSearchRadius(
+                P1,
+                P3,
+                input.state,
+                input.vehicle,
+                hasPreviousSegment,
+                previousSegment
+            );
+
         // =====================================================================
         // STAGE 1
         // =====================================================================
@@ -1543,6 +1895,7 @@ ModifierResult progressiveModify(
                 input.vehicle,
                 input.state,
                 L_up,
+                Rsearch,
                 best,
                 secondBest,
                 statistics,
@@ -1588,7 +1941,9 @@ ModifierResult progressiveModify(
         const bool refinementEligible =
             secondBest.feasible() &&
             secondBest.anchorIndex ==
-                best.anchorIndex;
+                best.anchorIndex &&
+            best.radialIndex > 0 &&
+            secondBest.radialIndex > 0;
 
         if (refinementEligible)
         {
@@ -1624,6 +1979,7 @@ ModifierResult progressiveModify(
                     input.vehicle,
                     input.state,
                     L_up,
+                    Rsearch,
                     best,
                     secondBest,
                     statistics,
@@ -1804,9 +2160,6 @@ ModifierResult progressiveModify(
 
     // ------------------------------------------------------------------------
     // Success means the complete upstream path was incorporated.
-    //
-    // This prevents a partially generated trajectory from being reported as
-    // a successful full-path search.
     // ------------------------------------------------------------------------
 
     const std::size_t requiredSegments =

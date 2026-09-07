@@ -90,26 +90,26 @@ inline constexpr double EPS_CURVATURE = 1e-9;
 // Number of coarse rays at each anchor.
 //
 // Explicitly fixed by the methodology:
-// N_theta = 6.
-inline constexpr std::size_t NUM_COARSE_RAYS = 6;
+// N_theta = 4.
+inline constexpr std::size_t NUM_COARSE_RAYS = 4;
 
-// Angular separation between the six uniformly distributed rays.
-// 360 / 6 = 60 degrees.
+// Angular separation between the four uniformly distributed rays.
+// 360 / 4 = 90 degrees.
 inline constexpr double COARSE_RAY_SPACING =
     2.0 * PI / static_cast<double>(NUM_COARSE_RAYS);
 
 // Rotation applied at alternating anchors.
-// Explicitly defined as 30 degrees.
+// Explicitly defined as 45 degrees.
 inline constexpr double ALTERNATING_RAY_ROTATION =
-    radians(30.0);
+    radians(45.0);
 
 // Anchor spacing along P1 -> A_C.
 // Explicitly D_UAV.
-inline constexpr double ANCHOR_SPACING_MULTIPLIER = 1.5;
+inline constexpr double ANCHOR_SPACING_MULTIPLIER = 1;
 
 // Radial candidate spacing.
 // Explicitly D_UAV.
-inline constexpr double RADIAL_SPACING_MULTIPLIER = 1.5;
+inline constexpr double RADIAL_SPACING_MULTIPLIER = 2;
 
 
 // ============================================================================
@@ -229,26 +229,6 @@ inline constexpr std::size_t NUM_SCENARIOS = 100;
 // Fixed random seed if scenarios are procedurally generated.
 // Use a fixed seed so the experiment is reproducible.
 inline constexpr unsigned int RANDOM_SEED = 12345;
-
-
-// ============================================================================
-// B-SPLINE BASELINE
-// ============================================================================
-
-// Cubic B-spline degree.
-//
-// Fixed at 3 for the baseline.
-inline constexpr int BSPLINE_DEGREE = 3;
-
-// Smoothing parameter.
-//
-// IMPORTANT:
-// This value must be selected/calibrated before the final experiment and
-// then frozen across all scenarios.
-//
-// Do NOT claim the value is from the paper unless it actually is.
-inline constexpr double BSPLINE_SMOOTHING = 0.0;
-
 
 // ============================================================================
 // DERIVED EXECUTION QUANTITIES

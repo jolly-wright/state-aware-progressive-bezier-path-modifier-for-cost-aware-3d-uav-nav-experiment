@@ -2,15 +2,15 @@
     "scenario_id": 1,
     "success": true,
     "timing": {
-        "generation_time_ms": 5228.631,
-        "sum_segment_generation_time_ms": 5228.627
+        "generation_time_ms": 1865.534,
+        "sum_segment_generation_time_ms": 1865.53
     },
     "search_statistics": {
         "generated_segments": 3,
         "incorporated_corners": 3,
-        "stage1_candidate_evaluations": 2196,
-        "stage3_candidate_evaluations": 9,
-        "refinement_iterations": 3
+        "stage1_candidate_evaluations": 900,
+        "stage3_candidate_evaluations": 0,
+        "refinement_iterations": 0
     },
     "uav": {
         "position": [
@@ -108,8 +108,8 @@
     "final_bezier_segments": [
         {
             "corner_index": 1,
-            "generation_time_ms": 752.253,
-            "maximum_curvature": 0.281873453,
+            "generation_time_ms": 50.417,
+            "maximum_curvature": 0.355424569,
             "P0": [
                 0,
                 0,
@@ -121,9 +121,9 @@
                 0
             ],
             "P2": [
-                3.20135572,
-                -1.104425631,
-                -5.510910815e-17
+                2.853791626,
+                -1.390256378,
+                0
             ],
             "P3": [
                 5,
@@ -133,22 +133,22 @@
         },
         {
             "corner_index": 2,
-            "generation_time_ms": 2635.927,
-            "maximum_curvature": 1.025542478,
+            "generation_time_ms": 1784.929,
+            "maximum_curvature": 1.36601318,
             "P0": [
                 5,
                 -4,
                 0
             ],
             "P1": [
-                8.378656257,
-                -9.43918026,
-                1.03519487e-16
+                9.0671327,
+                -8.945546644,
+                0
             ],
             "P2": [
-                8.95326213,
-                -2.303270914,
-                3.242087415
+                8.012961146,
+                -0.849541208,
+                1.975708464
             ],
             "P3": [
                 8,
@@ -158,22 +158,22 @@
         },
         {
             "corner_index": 3,
-            "generation_time_ms": 1840.447,
-            "maximum_curvature": 0.564913662,
+            "generation_time_ms": 30.184,
+            "maximum_curvature": 0.333778779,
             "P0": [
                 8,
                 -0.75,
                 2
             ],
             "P1": [
-                5.901929998,
-                2.668651605,
-                -0.733756293
+                7.390824157,
+                3.92845193,
+                3.141705888
             ],
             "P2": [
-                8.694897287,
-                4.185067144,
-                3.087868964
+                9.514741915,
+                4.800712027,
+                3.840373289
             ],
             "P3": [
                 10,
