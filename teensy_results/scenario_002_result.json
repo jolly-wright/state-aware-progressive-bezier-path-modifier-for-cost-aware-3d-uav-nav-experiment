@@ -1,14 +1,14 @@
 {
     "scenario_id": 2,
-    "success": false,
+    "success": true,
     "timing": {
-        "generation_time_ms": 33.719,
-        "sum_segment_generation_time_ms": 33.349
+        "generation_time_ms": 449.644,
+        "sum_segment_generation_time_ms": 449.637
     },
     "search_statistics": {
-        "generated_segments": 1,
-        "incorporated_corners": 1,
-        "stage1_candidate_evaluations": 32,
+        "generated_segments": 6,
+        "incorporated_corners": 6,
+        "stage1_candidate_evaluations": 166,
         "stage3_candidate_evaluations": 0,
         "refinement_iterations": 0
     },
@@ -38,7 +38,7 @@
             -4
         ]
     },
-    "goal_reached": false,
+    "goal_reached": true,
     "map": {
         "resolution_m": 0.1,
         "obstacles": [
@@ -136,8 +136,8 @@
     "final_bezier_segments": [
         {
             "corner_index": 1,
-            "generation_time_ms": 33.349,
-            "maximum_curvature": 20.22737866,
+            "generation_time_ms": 30.618,
+            "maximum_curvature": 0.932944787,
             "goal_direction_deviation_deg": 61.04110512,
             "P0": [
                 0,
@@ -150,14 +150,144 @@
                 -0.26756472
             ],
             "P2": [
-                3,
-                -2,
-                0
+                1.975604629,
+                -0.654236656,
+                -0.142035664
             ],
             "P3": [
                 3,
                 -2,
                 0
+            ]
+        },
+        {
+            "corner_index": 2,
+            "generation_time_ms": 58.385,
+            "maximum_curvature": 1.236225057,
+            "goal_direction_deviation_deg": 100.3911343,
+            "P0": [
+                3,
+                -2,
+                0
+            ],
+            "P1": [
+                5.176180261,
+                -4.858880182,
+                0.301734287
+            ],
+            "P2": [
+                6.307605272,
+                1.003178193,
+                0.898518932
+            ],
+            "P3": [
+                6.5,
+                2,
+                1
+            ]
+        },
+        {
+            "corner_index": 3,
+            "generation_time_ms": 77.186,
+            "maximum_curvature": 4.803230656,
+            "goal_direction_deviation_deg": 128.5775801,
+            "P0": [
+                6.5,
+                2,
+                1
+            ],
+            "P1": [
+                7.519852683,
+                7.283987803,
+                1.537934387
+            ],
+            "P2": [
+                8.499185734,
+                -0.743325693,
+                1.999616135
+            ],
+            "P3": [
+                8.5,
+                -0.75,
+                2
+            ]
+        },
+        {
+            "corner_index": 4,
+            "generation_time_ms": 30.347,
+            "maximum_curvature": 1.196260601,
+            "goal_direction_deviation_deg": 57.43076841,
+            "P0": [
+                8.5,
+                -0.75,
+                2
+            ],
+            "P1": [
+                8.928532153,
+                -4.262555745,
+                2.202020623
+            ],
+            "P2": [
+                10.88910617,
+                -2.121123519,
+                2.957281021
+            ],
+            "P3": [
+                11,
+                -2,
+                3
+            ]
+        },
+        {
+            "corner_index": 5,
+            "generation_time_ms": 136.894,
+            "maximum_curvature": 0.1658024,
+            "goal_direction_deviation_deg": 25.1133994,
+            "P0": [
+                11,
+                -2,
+                3
+            ],
+            "P1": [
+                12.9400438,
+                0.119008149,
+                3.747351665
+            ],
+            "P2": [
+                12.98838011,
+                2.44164576,
+                3.144841427
+            ],
+            "P3": [
+                13,
+                3,
+                3
+            ]
+        },
+        {
+            "corner_index": 6,
+            "generation_time_ms": 116.207,
+            "maximum_curvature": 0.932218482,
+            "goal_direction_deviation_deg": 108.4409726,
+            "P0": [
+                13,
+                3,
+                3
+            ],
+            "P1": [
+                13.10845792,
+                8.211577427,
+                1.648076333
+            ],
+            "P2": [
+                16.05054036,
+                0.491423823,
+                -2.621980587
+            ],
+            "P3": [
+                17,
+                -2,
+                -4
             ]
         }
     ]

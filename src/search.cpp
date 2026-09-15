@@ -436,7 +436,8 @@ std::vector<Ray> makeCoarseRays(
 //
 // P1 ---------------- P3
 //
-// The final anchor is exactly P3.
+// Anchors are placed along the P1 -> P3 span,
+// excluding P3 itself.
 //
 // The actual P1 supplied here has already passed through the P1 construction
 // and obstacle-limiting logic in makeSearchP1().
@@ -489,11 +490,6 @@ std::vector<Anchor> makeAnchors(
             anchorIndex++
         });
     }
-
-    anchors.push_back({
-        P3,
-        anchorIndex
-    });
 
     return anchors;
 }
