@@ -764,56 +764,25 @@ double exactUpstreamLength(
 // ============================================================================
 // DYNAMIC SEARCH RADIUS
 // ============================================================================
-//
 // The search geometry is defined by:
-//
 //     P1 ---------------- P3
-//
-// NOT:
-//
-//     P0 ---------------- P3
-//
-// P1 is the actual P1 produced by makeSearchP1(), meaning that on
-// continuation segments it has already been limited against the nearest
-// obstacle.
-//
-// The P1 -> P3 direction is treated as the "ground" direction.
-//
-// The UAV starts with its current speed magnitude:
-//
-//     v = |state.velocity|
-//
-// The direction is:
-//
-//     first segment:
-//         state.velocity
-//
-//     subsequent segments:
-//         terminal tangent of previousSegment
-//
-// A_MAX is treated as a constant acceleration acting toward the
-// P1 -> P3 line.
-//
-// The perpendicular motion therefore follows:
-//
+// P1 is the actual P1 produced by makeSearchP1().
+// A reference trajectory is constructed from the current velocity direction
+// and speed.  Its perpendicular motion is:
 //     d(t) = v_perpendicular * t
 //            - 0.5 * A_MAX * t^2
-//
-// The projectile reaches the P1 -> P3 line again at:
-//
-//     t_return = 2 * |v_perpendicular| / A_MAX
-//
-// Its maximum perpendicular displacement is:
-//
-//     d_max = v_perpendicular^2 / (2 * A_MAX)
-//
-// The along-line distance travelled by that time is checked against
-// the P1 -> P3 segment.
-//
-// If the projectile reaches the line before passing P3,
-// d_max becomes the radial search limit.
-//
-// Otherwise the normal L13 * 0.5 fallback radius is retained.
+// If the trajectory naturally returns to the P1 -> P3 line before reaching
+// P3, that return point terminates the reference trajectory.
+// If it would return beyond P3, the reference trajectory is instead terminated
+// at P3 for search-radius construction.
+// The maximum perpendicular deviation of this reference trajectory is then
+// scaled by the fraction of the P1 -> P3 chord actually traversed:
+//     R_search = d_perpendicular_max * (b / L13)
+// where:
+//     b   = traversed distance along P1 -> P3
+//     L13 = complete P1 -> P3 distance
+// This radius is the maximum radial search distance used by Stage 1 and
+// Stage 3.
 //
 
 double makeDynamicSearchRadius(
@@ -837,15 +806,7 @@ double makeDynamicSearchRadius(
     }
 
     // ------------------------------------------------------------------------
-    // Normal fallback radius.
-    // ------------------------------------------------------------------------
-
-    const double fallbackRadius =
-        L13 * 0.5;
-
-    // ------------------------------------------------------------------------
-    // The simulation uses the magnitude of the current state velocity for
-    // every segment.
+    // The simulation uses the magnitude of the current state velocity.
     // ------------------------------------------------------------------------
 
     const double speed =
@@ -854,7 +815,7 @@ double makeDynamicSearchRadius(
     if (speed <=
         config::EPS_GEOMETRY)
     {
-        return fallbackRadius;
+        return 0.0;
     }
 
     // ------------------------------------------------------------------------
@@ -878,7 +839,7 @@ double makeDynamicSearchRadius(
     if (initialDirectionLength <=
         config::EPS_GEOMETRY)
     {
-        return fallbackRadius;
+        return 0.0;
     }
 
     const Vec3 initialDirection =
@@ -916,26 +877,16 @@ double makeDynamicSearchRadius(
             vPerpendicularSquared
         );
 
-    // ------------------------------------------------------------------------
-    // No meaningful lateral component -> normal fallback.
-    // ------------------------------------------------------------------------
-
     if (vPerpendicular <=
         config::EPS_GEOMETRY)
     {
-        return fallbackRadius;
+        return 0.0;
     }
-
-    // ------------------------------------------------------------------------
-    // If the UAV is not travelling toward P3 along the P1 -> P3 direction,
-    // the projectile cannot return to the intended segment in the required
-    // forward direction.
-    // ------------------------------------------------------------------------
 
     if (vParallel <=
         config::EPS_GEOMETRY)
     {
-        return fallbackRadius;
+        return 0.0;
     }
 
     // ------------------------------------------------------------------------
@@ -948,11 +899,17 @@ double makeDynamicSearchRadius(
     if (A_MAX <=
         config::EPS_GEOMETRY)
     {
-        return fallbackRadius;
+        return 0.0;
     }
 
     // ------------------------------------------------------------------------
-    // Time at which perpendicular motion returns to the P1 -> P3 line.
+    // Reference trajectory:
+    //
+    //     d(t) = v_perpendicular * t
+    //            - 0.5 * A_MAX * t^2
+    //
+    // First determine when this reference trajectory would naturally return
+    // to the P1 -> P3 line.
     // ------------------------------------------------------------------------
 
     const double tReturn =
@@ -964,42 +921,139 @@ double makeDynamicSearchRadius(
         tReturn <=
             config::EPS_GEOMETRY)
     {
-        return fallbackRadius;
+        return 0.0;
     }
 
     // ------------------------------------------------------------------------
-    // Along-line distance travelled before returning to the line.
+    // Time required to reach P3 along the P1 -> P3 direction.
+    //
+    // If natural return occurs before this point:
+    //
+    //     endpoint = natural return point
+    //
+    // Otherwise:
+    //
+    //     endpoint = P3
+    //
+    // In the latter case, the reference trajectory is simply terminated at
+    // P3 for the purpose of determining the search geometry.  A_MAX is not
+    // used to reject that reference construction.
     // ------------------------------------------------------------------------
 
-    const double returnDistance =
-        vParallel *
-        tReturn;
+    const double tToP3 =
+        L13 /
+        vParallel;
 
-    // ------------------------------------------------------------------------
-    // If the projectile returns beyond P3, discard it.
-    // ------------------------------------------------------------------------
-
-    if (!std::isfinite(returnDistance) ||
-        returnDistance >
-            L13 +
+    if (!std::isfinite(tToP3) ||
+        tToP3 <=
             config::EPS_GEOMETRY)
     {
-        return fallbackRadius;
+        return 0.0;
+    }
+
+    const bool reachesP3BeforeReturn =
+        tToP3 < tReturn;
+
+    const double tEnd =
+        reachesP3BeforeReturn
+            ? tToP3
+            : tReturn;
+
+    // ------------------------------------------------------------------------
+    // Maximum perpendicular displacement over the actual reference interval.
+    //
+    // The unconstrained maximum occurs at:
+    //
+    //     t_peak = v_perpendicular / A_MAX
+    // ------------------------------------------------------------------------
+
+    const double tPeak =
+        vPerpendicular /
+        A_MAX;
+
+    const double tMaximum =
+        std::min(
+            tPeak,
+            tEnd
+        );
+
+    const double dPerpendicularMax =
+        vPerpendicular *
+            tMaximum -
+        0.5 *
+            A_MAX *
+            tMaximum *
+            tMaximum;
+
+    if (!std::isfinite(dPerpendicularMax) ||
+        dPerpendicularMax <=
+            config::EPS_GEOMETRY)
+    {
+        return 0.0;
     }
 
     // ------------------------------------------------------------------------
-    // Maximum perpendicular displacement.
+    // Determine how much of the P1 -> P3 chord the reference trajectory
+    // actually traverses.
+    //
+    // b = distance along P1 -> P3 between the trajectory's start and end.
+    // l = complete P1 -> P3 distance.
     // ------------------------------------------------------------------------
 
-    const double dynamicRadius =
-        vPerpendicularSquared /
-        (2.0 * A_MAX);
+    const double b =
+        vParallel *
+        tEnd;
+
+    if (!std::isfinite(b) ||
+        b <=
+            config::EPS_GEOMETRY)
+    {
+        return 0.0;
+    }
+
+    const double bOverL13 =
+        std::min(
+            1.0,
+            b / L13
+        );
+
+    // ------------------------------------------------------------------------
+    // Dynamic search radius:
+    //
+    //     R_search =
+    //         d_perpendicular_max * (b / L13)
+    //
+    // This scales the maximum lateral deviation according to the fraction
+    // of the P1 -> P3 chord actually traversed by the reference trajectory.
+    // ------------------------------------------------------------------------
+
+    double dynamicRadius =
+        dPerpendicularMax *
+        bOverL13;
 
     if (!std::isfinite(dynamicRadius) ||
         dynamicRadius <=
             config::EPS_GEOMETRY)
     {
-        return fallbackRadius;
+        return 0.0;
+    }
+
+    // ------------------------------------------------------------------------
+    // The Stage-1 radial candidates are spaced at 2 * D_UAV.
+    //
+    // Keep the actual geometric radius from exceeding the arc-derived value.
+    // If the arc-derived radius is below 2 * D_UAV, the search simply has no
+    // radial ring; the anchor itself is still evaluated by Stage 1.
+    // ------------------------------------------------------------------------
+
+    const double D_UAV =
+        vehicle.dimensions.maxDimension();
+
+    if (dynamicRadius <
+        D_UAV *
+            config::RADIAL_SPACING_MULTIPLIER)
+    {
+        return dynamicRadius;
     }
 
     return dynamicRadius;

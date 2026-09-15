@@ -1,14 +1,10 @@
 #pragma once
-
 #include "types.hpp"
 #include "config.hpp"
-
 namespace uav::bezier {
-
 // ============================================================================
 // CONTROL-POINT CONSTRUCTION
 // ============================================================================
-
 // Construct P1 according to the paper's state-aware initialization rule.
 //
 // For a moving UAV:
@@ -28,8 +24,6 @@ Vec3 makeP1(
     const Map3D& map,
     double eps = config::EPS_GEOMETRY
 );
-
-
 // Construct P3 for a corner according to the paper.
 //
 // previousCorner = C_{i-1}
@@ -42,12 +36,9 @@ Vec3 makeP3(
     double D_UAV,
     double eps = config::EPS_GEOMETRY
 );
-
-
 // ============================================================================
 // BÉZIER SEGMENT CONSTRUCTION
 // ============================================================================
-
 BezierSegment makeSegment(
     const Vec3& P0,
     const Vec3& P1,
@@ -55,12 +46,9 @@ BezierSegment makeSegment(
     const Vec3& P3,
     std::size_t cornerIndex = 0
 );
-
-
 // ============================================================================
 // CURVATURE
 // ============================================================================
-
 // Estimate the maximum curvature of a cubic Bézier segment.
 //
 // Curvature:
@@ -74,12 +62,9 @@ double maximumCurvature(
     double epsDerivative = config::EPS_BEZIER_DERIVATIVE,
     double epsCurvature = config::EPS_CURVATURE
 );
-
-
 // ============================================================================
 // ARC LENGTH
 // ============================================================================
-
 // Numerically estimate:
 //
 //   L = integral_0^1 ||B'(u)|| du
@@ -89,5 +74,4 @@ double arcLength(
     const BezierSegment& segment,
     std::size_t samples = config::ARC_LENGTH_SAMPLES
 );
-
 } // namespace uav::bezier

@@ -797,7 +797,7 @@ def build_experimental_scenarios() -> list[dict]:
 
             dimensions=[0.30, 0.30, 0.15],
             position=[0.0, 0.0, 0.0],
-            velocity=[3.0, 0.0, 0.0],
+            velocity=[1.0, 0.0, 0.0],
             max_velocity=10.0,
             max_lateral_acceleration=8.0,
 

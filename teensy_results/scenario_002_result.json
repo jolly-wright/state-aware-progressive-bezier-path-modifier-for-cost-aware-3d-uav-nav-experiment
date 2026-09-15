@@ -1,14 +1,14 @@
 {
     "scenario_id": 2,
-    "success": true,
+    "success": false,
     "timing": {
-        "generation_time_ms": 6236.299,
-        "sum_segment_generation_time_ms": 6236.293
+        "generation_time_ms": 33.719,
+        "sum_segment_generation_time_ms": 33.349
     },
     "search_statistics": {
-        "generated_segments": 6,
-        "incorporated_corners": 6,
-        "stage1_candidate_evaluations": 2812,
+        "generated_segments": 1,
+        "incorporated_corners": 1,
+        "stage1_candidate_evaluations": 32,
         "stage3_candidate_evaluations": 0,
         "refinement_iterations": 0
     },
@@ -38,7 +38,7 @@
             -4
         ]
     },
-    "goal_reached": true,
+    "goal_reached": false,
     "map": {
         "resolution_m": 0.1,
         "obstacles": [
@@ -136,8 +136,9 @@
     "final_bezier_segments": [
         {
             "corner_index": 1,
-            "generation_time_ms": 298.532,
-            "maximum_curvature": 0.66731096,
+            "generation_time_ms": 33.349,
+            "maximum_curvature": 20.22737866,
+            "goal_direction_deviation_deg": 61.04110512,
             "P0": [
                 0,
                 0,
@@ -149,139 +150,14 @@
                 -0.26756472
             ],
             "P2": [
-                2.271956629,
-                -0.052950346,
-                -0.167141475
+                3,
+                -2,
+                0
             ],
             "P3": [
                 3,
                 -2,
                 0
-            ]
-        },
-        {
-            "corner_index": 2,
-            "generation_time_ms": 1244.161,
-            "maximum_curvature": 0.798866867,
-            "P0": [
-                3,
-                -2,
-                0
-            ],
-            "P1": [
-                4.258736815,
-                -5.366314669,
-                0.288976091
-            ],
-            "P2": [
-                7.892642057,
-                -2.168040423,
-                -1.887207904
-            ],
-            "P3": [
-                6.5,
-                2,
-                1
-            ]
-        },
-        {
-            "corner_index": 3,
-            "generation_time_ms": 1589.212,
-            "maximum_curvature": 1.087934505,
-            "P0": [
-                6.5,
-                2,
-                1
-            ],
-            "P1": [
-                5.067578866,
-                6.287095279,
-                3.969677384
-            ],
-            "P2": [
-                8.513655856,
-                -0.77799702,
-                5.704332777
-            ],
-            "P3": [
-                8.5,
-                -0.75,
-                2
-            ]
-        },
-        {
-            "corner_index": 4,
-            "generation_time_ms": 885.065,
-            "maximum_curvature": 1.027469106,
-            "P0": [
-                8.5,
-                -0.75,
-                2
-            ],
-            "P1": [
-                8.486934332,
-                -0.723212974,
-                -1.544236412
-            ],
-            "P2": [
-                11.89071069,
-                -3.4456216,
-                1.103932742
-            ],
-            "P3": [
-                11,
-                -2,
-                3
-            ]
-        },
-        {
-            "corner_index": 5,
-            "generation_time_ms": 383.245,
-            "maximum_curvature": 0.426572164,
-            "P0": [
-                11,
-                -2,
-                3
-            ],
-            "P1": [
-                9.961139832,
-                -0.313932097,
-                5.211434959
-            ],
-            "P2": [
-                12.13849699,
-                2.060515349,
-                4.964218502
-            ],
-            "P3": [
-                13,
-                3,
-                3
-            ]
-        },
-        {
-            "corner_index": 6,
-            "generation_time_ms": 1836.078,
-            "maximum_curvature": 0.241973094,
-            "P0": [
-                13,
-                3,
-                3
-            ],
-            "P1": [
-                14.98128859,
-                5.160631123,
-                -1.517318747
-            ],
-            "P2": [
-                16.91170125,
-                -1.686792897,
-                -3.891407142
-            ],
-            "P3": [
-                17,
-                -2,
-                -4
             ]
         }
     ]
