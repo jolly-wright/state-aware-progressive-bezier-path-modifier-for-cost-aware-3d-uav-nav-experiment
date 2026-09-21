@@ -1,8 +1,8 @@
 # A state-aware progressive B\'ezier path modifier for cost-aware 3D UAV navigation
-A downstream progressive bezier modifier that modifies waypoint based paths from upstream planners with proper data output format, modifies by going through collision and objective wighted cost fuctions. This is still an experimental stage, experimented on Teensy 4.0, not recommended for direct usage unless one knows what they are doing.
+A downstream progressive bezier modifier that modifies waypoint based paths from upstream planners with proper data output format, modifies by going through collision and objective weighted cost functions. This is still an experimental stage, experimented on Teensy 4.0 and supported by other mcus available in Platform IO that support Arduino framework (make sure to check the USB communication between your pc/laptop and the mcu setup in main.cpp), not recommended for direct usage unless one knows what they are doing.
 
 1. you can input scenarios and their objects via py_scripts/input.py, run that file as it's going to create required json files in scenarios folder.
-2. this is a platform io project, so u can directly upload this to a Teensy or change environment in platformio.ini
+2. this is a platform io project, so u can directly upload this to a Teensy or change environment in platformio.ini based on your selected mcu board or experimental usage
 3. cost weights are set in include/config.hpp
 4. run.py reads json files from scenarios folder and asks confirmation msg for running them (if the terminal resets, the py script may not find the teensy, unplug and replug it without resetting the terminal), run.py communicates with the teensy via serial usb
 5. all the scenarios are run through teensy, if there are impossible scenarios, the code might crash and not output will be provided by the teensy, thus check 'input_visualization' folder after running input.py as it'll generate html files of 3d plots for each scenarios for you to view and debug scenario inputs [make sure to have required python dependencies such as matplotlib and plotly, both are used here]
